@@ -1,0 +1,7 @@
+{
+  "host": "localhost",
+  "port": 1883,
+  "username": "user",
+  "password": "secret",
+  "targetfile": "/home/pi/sensordata.csv"
+}
