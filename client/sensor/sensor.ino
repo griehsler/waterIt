@@ -6,6 +6,7 @@
 #define MAX_OUTPUT_VALUE 255; // report humidity level 0..MAX_OUTPUT_VALUE
 #define DEFAULT_MIN_VALUE 1024;
 #define DEFAULT_MAX_VALUE 1024;
+int SENSOR_POWER_PIN = D2;
 // #define DEBUG
 
 Storage _storage;
@@ -25,6 +26,9 @@ int maxValue2 = DEFAULT_MAX_VALUE;
 void setup()
 {
     Serial.begin(115200);
+
+    pinMode(SENSOR_POWER_PIN, OUTPUT);
+    digitalWrite(SENSOR_POWER_PIN, LOW);
 
     assignNetworkSettings();
     _network.setup();
@@ -66,7 +70,12 @@ String createClientId()
 
 int getCurrentMeasure()
 {
+    // turn sensor power on only as short as possible to reduce sensor wear (oxidation) to a minimum
+
+    digitalWrite(SENSOR_POWER_PIN, HIGH); // turn sensor on
+    delay(250); // give it a little time to initialize
     int rawValue = analogRead(A0);
+    digitalWrite(SENSOR_POWER_PIN, LOW); // turn sensor off
     adjustMinMax(rawValue);
     return normalize(rawValue);
 }
