@@ -7,7 +7,7 @@
 #define MAX_OUTPUT_VALUE 255; // report humidity level 0..MAX_OUTPUT_VALUE
 #define DEFAULT_MIN_VALUE 1024;
 #define DEFAULT_MAX_VALUE 1024;
-int SLEEP_TIME = 1000 * 1000 * 5; // 5 seconds
+int SLEEP_TIME = 1000 * 1000 * 60 * 15; // 15 minutes
 int SENSOR_POWER_PIN = D2;
 
 // #define DEBUG
