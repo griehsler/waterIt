@@ -1,0 +1,84 @@
+<html>
+
+<head>
+    <title>Moisture Chart</title>
+    <script src="lib/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+    <meta http-equiv="refresh" content="300">
+</head>
+
+<body>
+    <div style="width:75%;">
+        <canvas id="canvas"></canvas>
+    </div>
+    <script>
+        const sampleSize = 144;
+
+        Papa.parse('http://hawking.home/sensordata.csv', {
+            download: true,
+            delimiter: ";",
+            skipEmptyLines: true,
+            complete: function (results) {
+
+                var chartData = results.data
+                    .filter(e => !!e);
+
+                while (chartData.length > sampleSize) {
+                    chartData.shift();
+                }
+
+                chartData = chartData
+                    .map(e => {
+                        return {
+                            "t": e[1].slice(0, 8) + "T" + e[1].slice(8) + "+0000",
+                            "y": e[2]
+                        }
+                    });
+
+                var ctx = document.getElementById('canvas').getContext('2d');
+                var config = {
+                    type: "line",
+                    data: {
+                        datasets: [{
+                            label: 'Moisture data',
+                            data: chartData,
+                            fill: false,
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                type: 'time',
+                                distribution: 'linear',
+                                time: {
+                                    isoWeekday: true,
+                                    displayFormats: {
+                                        hour: 'H',
+                                        minute: 'H:mm'
+                                    }
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    min: 0,
+                                    max: 255
+                                }
+                            }]
+                        },
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            text: "Soil moisture readings",
+                            display: true
+                        }
+                    }
+                };
+
+                window.myLine = new Chart(ctx, config);
+            }
+        });
+    </script>
+</body>
+
+</html>
