@@ -8,7 +8,8 @@
 #define DEFAULT_MIN_VALUE 1024;
 #define DEFAULT_MAX_VALUE 1024;
 int SLEEP_TIME = 1000 * 1000 * 60 * 15; // 15 minutes
-int SENSOR_POWER_PIN = D2;
+int SENSOR_POWER_PIN = D5;
+int SENSOR_MEASURE_PIN = A0;
 
 // #define DEBUG
 
@@ -82,7 +83,7 @@ int getCurrentMeasure()
 
     digitalWrite(SENSOR_POWER_PIN, HIGH); // turn sensor on
     delay(250);                           // give it a little time to initialize
-    int rawValue = analogRead(A0);
+    int rawValue = analogRead(SENSOR_MEASURE_PIN);
     digitalWrite(SENSOR_POWER_PIN, LOW); // turn sensor off
     adjustMinMax(rawValue);
     return normalize(rawValue);
