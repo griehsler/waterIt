@@ -1,0 +1,1 @@
+It's an Autodesk EAGLE schematic file.
