@@ -6,12 +6,11 @@
 WiFiClient _wifiClient;
 PubSubClient _client(_wifiClient);
 
-Bus::Bus(String incomingTopic, String defaultOutgoingTopic)
+Bus::Bus(Settings *settings)
 {
-    _incomingTopic = incomingTopic;
-    _defaultOutgoingTopic = defaultOutgoingTopic;
+    _settings = settings;
 
-    _client.setServer("newton.home", 1883);
+    _client.setServer(_settings->mqttServer.c_str(), _settings->mqttServerPort);
 }
 
 void Bus::loop()
@@ -33,17 +32,21 @@ void Bus::connect()
         String clientId = "ESP8266Client-";
         clientId += String(random(0xffff), HEX);
         // Attempt to connect
-        if (_client.connect(clientId.c_str(), "device", "cebewuby"))
+        boolean connectionSuccess = false;
+        if (_settings->mqttUserName)
+            connectionSuccess = _client.connect(clientId.c_str(), _settings->mqttUserName.c_str(), _settings->mqttPassword.c_str());
+        else
+            connectionSuccess = _client.connect(clientId.c_str());
+        if (connectionSuccess)
         {
             Serial.println("connected");
 
-            if (_client.subscribe(_incomingTopic.c_str()))
+            if (_settings->mqttSubscribeTopic)
             {
+                _client.subscribe(_settings->mqttSubscribeTopic.c_str());
                 Serial.print("subscribed to: ");
-                Serial.println(_incomingTopic);
+                Serial.println(_settings->mqttSubscribeTopic);
             }
-            else
-                Serial.println("failed to subscribe!");
         }
         else
         {
@@ -67,13 +70,11 @@ void Bus::send(String topic, String payload)
 
 void Bus::send(String payload)
 {
-    send(_defaultOutgoingTopic, payload);
+    send(_settings->mqttPublishTopic, payload);
 }
 
 void Bus::mqtt_callback(char *topic, byte *payload, unsigned int length)
 {
-    Serial.println("_got a message_");
-
     char charBuffer[length + 1];
     for (unsigned int i = 0; i < length; i++)
     {

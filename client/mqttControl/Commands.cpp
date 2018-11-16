@@ -18,9 +18,6 @@ void Commands::set_callback(COMMAND_CALLBACK)
 
 void Commands::read(char *message)
 {
-        Serial.println("-");
-
-
     StaticJsonBuffer<capacity> jb;
     JsonObject &obj = jb.parseObject(message);
     if (obj.success())

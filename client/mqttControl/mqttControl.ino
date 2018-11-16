@@ -11,7 +11,7 @@ Network _network(&_settings);
 String incomingTopic = "plants/1/toDevice";
 String outgoingTopic = "plants/1/fromDevice";
 
-Bus _bus(incomingTopic, outgoingTopic);
+Bus _bus(&_settings);
 Commands _commands(&_bus);
 
 void setup()
@@ -29,6 +29,13 @@ void assignNetworkSettings()
     _settings.hostName = "plant1";
     _settings.otherAPSSID = "GRIE";
     _settings.otherAPPassword = "HelloKitty";
+
+    _settings.mqttEnabled = true;
+    _settings.mqttServer = "newton.home";
+    _settings.mqttUserName = "device";
+    _settings.mqttPassword = "cebewuby";
+    _settings.mqttPublishTopic = outgoingTopic;
+    _settings.mqttSubscribeTopic = incomingTopic;
 }
 
 void loop()
