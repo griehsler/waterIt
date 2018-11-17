@@ -2,7 +2,8 @@
 #include <Network.h>
 
 #include "Bus.h"
-#include "Commands.h"
+#include "CommandsController.h"
+#include "CustomCommands.h"
 
 Storage _storage;
 Settings _settings(&_storage);
@@ -12,7 +13,7 @@ String incomingTopic = "plants/1/toDevice";
 String outgoingTopic = "plants/1/fromDevice";
 
 Bus _bus(&_settings);
-Commands _commands(&_bus);
+CommandsController _commandsController(&_bus);
 
 void setup()
 {
@@ -20,7 +21,8 @@ void setup()
 
     assignNetworkSettings();
     _network.setup();
-    _commands.set_callback(commandReceived);
+    _commandsController.setCreateCallback(createIncomingCommand);
+    _commandsController.setExecuteCallback(commandReceived);
 }
 
 void assignNetworkSettings()
@@ -43,14 +45,31 @@ void loop()
     _bus.loop();
 }
 
-void commandReceived(Command command)
+IncomingCommand *createIncomingCommand(String name)
 {
-    Serial.println(command.name);
+    if (name == "setInterval")
+        return new SetIntervalCommand;
+    return nullptr;
+}
 
-    if (command.name == "ping")
+void commandReceived(IncomingCommand *command)
+{
+    if (command->name == "ping")
     {
-        Command pongCommand;
+        DefaultCommand pongCommand;
         pongCommand.name = "pong";
-        _commands.send(pongCommand);
+        _commandsController.send(&pongCommand);
+    }
+    else if (command->name == "sendStatus")
+    {
+        DefaultCommand statusCommand;
+        statusCommand.name = "status";
+        _commandsController.send(&statusCommand);
+    }
+    else if (command->name == "setInterval")
+    {
+        SetIntervalCommand *setInterval = (SetIntervalCommand *)command;
+        Serial.print("received setInterval, new interval=");
+        Serial.println(setInterval->interval);
     }
 }

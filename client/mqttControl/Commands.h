@@ -1,25 +1,23 @@
 #pragma once
 
-#include <Arduino.h>
-#include "Bus.h"
+#include <ArduinoJson.h>
 
-struct Command
-{
-  String name;
-};
-
-#define COMMAND_CALLBACK void (*callback)(Command)
-
-class Commands
+class IncomingCommand
 {
 public:
-  Commands(Bus *bus);
-  void set_callback(COMMAND_CALLBACK);
-  void send(Command command);
+  String name;
+  virtual void readFrom(JsonObject &json);
+  virtual ~IncomingCommand();
+};
 
-private:
-  Bus *_bus;
-  COMMAND_CALLBACK;
+class OutgoingCommand
+{
+public:
+  virtual void writeTo(JsonObject &json);
+};
 
-  void read(char *message);
+class DefaultCommand : public IncomingCommand, public OutgoingCommand
+{
+public:
+  void writeTo(JsonObject &json) override;
 };
