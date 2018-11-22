@@ -1,7 +1,7 @@
 #include "HumiditySensor.h"
 #include <ArduinoJson.h>
 
-#define DEBUG
+//#define DEBUG
 
 HumiditySensor::HumiditySensor(Storage *storage, uint8_t sensorPowerPin, uint8_t sensorMeasurePin)
 {
@@ -16,7 +16,7 @@ HumiditySensor::HumiditySensor(Storage *storage, uint8_t sensorPowerPin, uint8_t
 
 int HumiditySensor::getMeasure()
 {
-    Serial.println("Collecting new measure ...");
+    Serial.print("Collecting new measure ... ");
     // turn sensor power on only as short as possible to reduce sensor wear (oxidation) to a minimum
 
     digitalWrite(_sensorPowerPin, HIGH); // turn sensor on
@@ -25,6 +25,7 @@ int HumiditySensor::getMeasure()
     digitalWrite(_sensorPowerPin, LOW); // turn sensor off
     adjustMinMax(rawValue);
     int normalized = normalize(rawValue);
+    Serial.println(normalized);
     return normalized;
 }
 

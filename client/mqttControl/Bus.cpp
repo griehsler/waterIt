@@ -43,7 +43,7 @@ void Bus::connect()
 
             if (_settings->mqttSubscribeTopic)
             {
-                _client.subscribe(_settings->mqttSubscribeTopic.c_str());
+                _client.subscribe(_settings->mqttSubscribeTopic.c_str(), 1);
                 Serial.print("subscribed to: ");
                 Serial.println(_settings->mqttSubscribeTopic);
             }

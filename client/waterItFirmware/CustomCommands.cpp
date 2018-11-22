@@ -16,8 +16,6 @@ void WaterLevelMeasureResult::writeTo(JsonObject &json)
 
 HumidityLevelMeasureResult::HumidityLevelMeasureResult(int value)
 {
-    Serial.print("receiving: ");
-    Serial.println(value);
     level = value;
 }
 

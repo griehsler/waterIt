@@ -16,14 +16,18 @@ void setupGPIO(int pumpPin, int waterLevelSensorPin)
 bool measureWaterLevel()
 {
     int value = digitalRead(_waterLevelSensorPin);
+    Serial.print("checked water level: ");
+    Serial.println(value);
     return value == 0;
 }
 
 void runPump(int duration)
 {
+    Serial.print("running pump...");
     digitalWrite(_pumpPin, HIGH);
     delay(duration);
     digitalWrite(_pumpPin, LOW);
+    Serial.println("done");
 }
 
 void deepSleep(uint64_t duration)
