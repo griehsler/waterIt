@@ -3,5 +3,7 @@
   "port": 1883,
   "username": "user",
   "password": "secret",
-  "targetfile": "/home/pi/sensordata.csv"
+  "incomingtopic": "device/out",
+  "outgoingtopic": "device/in",
+  "database": "db.sqlite"
 }

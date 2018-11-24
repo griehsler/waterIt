@@ -1,13 +1,35 @@
 import paho.mqtt.client as mqtt
-# import datetime
+from datetime import datetime
+import pytz
 import json
+from pony.orm import *
 
-incomingTopic = "plants/1/fromDevice"
-outgoingTopic = "plants/1/toDevice"
+with open('config.json') as config_file:
+    configuration = json.load(config_file)
+
+incomingTopic = configuration["incomingTopic"]
+outgoingTopic = configuration["outgoingTopic"]
 
 humidityThreshold = 128
 pumpDuration = 2000
 sleepDuration = 5000
+
+db = Database()
+set_sql_debug(True)
+
+
+class HumidityMeasure(db.Entity):
+    timestamp = Required(datetime)
+    value = Required(int)
+
+
+class Event(db.Entity):
+    timestamp = Required(datetime)
+    kind = Required(str)
+
+
+db.bind(provider='sqlite', filename=configuration["database"], create_db=True)
+db.generate_mapping(create_tables=True)
 
 
 def on_connect(client, userdata, flags, rc):
@@ -23,14 +45,19 @@ def on_message(client, userdata, msg):
     name = command["name"]
     if name == "humidityLevel":
         humidity = command["humidity"]
-        alert("received humidity measure: {}".format(humidity))
-        if humidity < humidityThreshold:
-            alert("triggering pump")
-            sendCommandAdv("feedWater", "duration", pumpDuration)
-            sendCommand("sendWaterLevel")
-        else:
-            sendCommandAdv("sleep", "duration", sleepDuration)
-            sendCommand("sendHumidityLevel", True)
+        now = datetime.now(pytz.utc)
+        with db_session:
+            HumidityMeasure(value=humidity,
+                            timestamp=now)
+            alert("received humidity measure: {}".format(humidity))
+            if humidity < humidityThreshold:
+                alert("triggering pump")
+                sendCommandAdv("feedWater", "duration", pumpDuration)
+                Event(kind="pump", timestamp=now)
+                sendCommand("sendWaterLevel")
+            else:
+                sendCommandAdv("sleep", "duration", sleepDuration)
+                sendCommand("sendHumidityLevel", True)
     elif name == "waterLevel":
         isLow = bool(command["isLow"])
         if isLow:
@@ -60,8 +87,7 @@ def alert(message):
     print(message)
 
 
-with open('config.json') as config_file:
-    configuration = json.load(config_file)
+
 
 client = mqtt.Client()
 client.on_connect = on_connect
