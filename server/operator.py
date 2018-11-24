@@ -15,7 +15,6 @@ pumpDuration = 2000
 sleepDuration = 5000
 
 db = Database()
-set_sql_debug(True)
 
 
 class HumidityMeasure(db.Entity):
@@ -85,8 +84,6 @@ def sendCommandAdv(name, paramName, paramValue, retain=False):
 
 def alert(message):
     print(message)
-
-
 
 
 client = mqtt.Client()
