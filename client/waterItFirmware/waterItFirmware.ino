@@ -9,6 +9,8 @@
 
 #include "private.h"
 
+String FIRMWARE_VERSION = "1.0";
+
 int LEVEL_SENSOR_PIN = D6;
 int WATER_FEED_PIN = D7;
 int SENSOR_POWER_PIN = D5;
@@ -53,6 +55,8 @@ IncomingCommand *createIncomingCommand(String name)
         return new FeedWaterCommand;
     if (name == "sleep")
         return new SleepCommand;
+    if (name == "update")
+        return new UpdateCommand;
     return nullptr;
 }
 
@@ -60,8 +64,8 @@ void commandReceived(IncomingCommand *command)
 {
     if (command->name == "ping")
     {
-        DefaultCommand pongCommand;
-        pongCommand.name = "pong";
+        PongCommand pongCommand;
+        pongCommand.info = "Version=" + FIRMWARE_VERSION;
         _commandsController.send(&pongCommand);
     }
     else if (command->name == "sendWaterLevel")
@@ -95,6 +99,11 @@ void commandReceived(IncomingCommand *command)
     {
         SleepCommand *sleepCommand = (SleepCommand *)command;
         deepSleep(sleepCommand->duration);
+    }
+    else if (command->name == "update")
+    {
+        UpdateCommand *updateCommand = (UpdateCommand *)command;
+        installUpdate(updateCommand->fileName);
     }
     else
     {

@@ -2,6 +2,14 @@
 #include <Arduino.h>
 #include "Commands.h"
 
+class PongCommand : public OutgoingCommand
+{
+public:
+  String name;
+  String info;
+  void writeTo(JsonObject &json) override;
+};
+
 class SendWaterLevelMeasureCommand : public IncomingCommand
 {
 };
@@ -53,5 +61,12 @@ class SleepCommand : public IncomingCommand
 {
 public:
   int duration;
+  void readFrom(JsonObject &json) override;
+};
+
+class UpdateCommand : public IncomingCommand
+{
+public:
+  String fileName;
   void readFrom(JsonObject &json) override;
 };

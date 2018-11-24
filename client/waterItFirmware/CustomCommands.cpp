@@ -2,6 +2,13 @@
 
 const int subCapacity = JSON_OBJECT_SIZE(7);
 
+void PongCommand::writeTo(JsonObject &json)
+{
+    OutgoingCommand::writeTo(json);
+    json["name"] = "pong";
+    json["info"] = info;
+}
+
 WaterLevelMeasureResult::WaterLevelMeasureResult(bool isLow)
 {
     this->isLow = isLow;
@@ -59,4 +66,10 @@ void SleepCommand::readFrom(JsonObject &json)
 {
     IncomingCommand::readFrom(json);
     duration = json["duration"].as<int>();
+}
+
+void UpdateCommand::readFrom(JsonObject &json)
+{
+    IncomingCommand::readFrom(json);
+    fileName = json["fileName"].as<String>();
 }

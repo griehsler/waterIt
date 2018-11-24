@@ -1,5 +1,8 @@
 #include <Arduino.h>
 #include <Storage.h>
+#include <ESP8266httpUpdate.h>
+
+#include "private.h"
 
 int _waterLevelSensorPin;
 int _pumpPin;
@@ -34,4 +37,14 @@ void deepSleep(uint64_t duration)
 {
     Serial.print("going to deep sleep");
     ESP.deepSleep(1000 * duration);
+}
+
+void installUpdate(String fileName)
+{
+    String fullFilePath = firmwareAddress + fileName;
+    Serial.print("Installing update ");
+    Serial.print(fullFilePath);
+    Serial.print(" ... ");
+    ESPhttpUpdate.update(firmwareHost, 80, fullFilePath);
+    Serial.println("done");
 }
