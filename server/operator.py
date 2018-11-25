@@ -12,7 +12,7 @@ incomingTopic = configuration["incomingTopic"]
 outgoingTopic = configuration["outgoingTopic"]
 
 humidityThreshold = configuration["humidityThreshold"]
-pumpDuration = configuraion["pumpSeconds"] * 1000
+pumpDuration = configuration["pumpSeconds"] * 1000
 sleepDuration = configuration["sleepMinutes"] * 60000
 
 db = Database()
