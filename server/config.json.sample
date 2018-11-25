@@ -5,5 +5,8 @@
   "password": "secret",
   "incomingtopic": "device/out",
   "outgoingtopic": "device/in",
-  "database": "db.sqlite"
+  "database": "db.sqlite",
+  "humidityThreshold": 64,
+  "pumpSeconds": 2,
+  "sleepMinutes": 15
 }

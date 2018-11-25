@@ -3,16 +3,17 @@ from datetime import datetime
 import pytz
 import json
 from pony.orm import *
+import sys
 
-with open('config.json') as config_file:
+with open(sys.argv[1]) as config_file:
     configuration = json.load(config_file)
 
 incomingTopic = configuration["incomingTopic"]
 outgoingTopic = configuration["outgoingTopic"]
 
-humidityThreshold = 128
-pumpDuration = 2000
-sleepDuration = 5000
+humidityThreshold = configuration["humidityThreshold"]
+pumpDuration = configuraion["pumpSeconds"] * 1000
+sleepDuration = configuration["sleepMinutes"] * 60000
 
 db = Database()
 
