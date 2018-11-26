@@ -1,8 +1,10 @@
+<!DOCTYPE html>
 <html>
 
 <head>
     <title>Moisture Chart</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+    <script src="config.js"></script>
     <meta http-equiv="refresh" content="300">
 </head>
 
@@ -10,69 +12,7 @@
     <div style="width:75%;">
         <canvas id="canvas"></canvas>
     </div>
-    <script>
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "http://newton.home:5000/api/getdata", true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                var chartData = JSON.parse(xhr.responseText);
-
-                chartData = chartData
-                    .map(e => {
-                        return {
-                            "t": e.timestamp.slice(0, 10) + "T" + e.timestamp.slice(11) + "+0000",
-                            "y": e.value
-                        }
-                    });
-
-                var ctx = document.getElementById('canvas').getContext('2d');
-                var config = {
-                    type: "line",
-                    data: {
-                        datasets: [{
-                            label: 'Moisture data',
-                            data: chartData,
-                            fill: false,
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            xAxes: [{
-                                type: 'time',
-                                distribution: 'linear',
-                                time: {
-                                    isoWeekday: true,
-                                    displayFormats: {
-                                        hour: 'H',
-                                        minute: 'H:mm'
-                                    }
-                                }
-                            }],
-                            yAxes: [{
-                                ticks: {
-                                    min: 0,
-                                    max: 255
-                                }
-                            }]
-                        },
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            text: "Soil moisture readings",
-                            display: true
-                        }
-                    }
-                };
-
-                window.myLine = new Chart(ctx, config);
-            }
-        };
-
-        xhr.send();
-
-    </script>
+    <script src="drawchart.js"></script>
 </body>
 
 </html>

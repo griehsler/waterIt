@@ -46,7 +46,7 @@ class WebService(object):
 
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
-        if (request.path == "/api/getdata"):
+        if (request.path == "/getdata"):
             if (request.method == "GET"):
                 response = self.get_data_response()
             elif (request.method == "OPTIONS"):
