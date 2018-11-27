@@ -5,7 +5,7 @@ from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.debug import DebuggedApplication
 import json
 from pony.orm.core import *
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 
 with open(sys.argv[1]) as config_file:
@@ -31,24 +31,24 @@ class WebService(object):
                 filename=configuration["database"], create_db=True)
         db.generate_mapping(create_tables=False)
 
-    def load_data(self):
+    def load_data(self, days):
         elements = list()
         with db_session:
-            for m in select(m for m in HumidityMeasure):
+            for m in select(m for m in HumidityMeasure if m.timestamp + timedelta(days=days) >= datetime.now()):
                 elements.append(
                     '{"value":' + str(m.value) + ',"timestamp":"' + str(m.timestamp) + '"}')
         result = '[' + ','.join(elements) + ']'
         return result
 
-    def get_data_response(self):
-        serialized = self.load_data()
+    def get_data_response(self, days):
+        serialized = self.load_data(days)
         return Response(serialized, mimetype='application/json')
 
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
         if (request.path == "/getdata"):
             if (request.method == "GET"):
-                response = self.get_data_response()
+                response = self.get_data_response(2)
             elif (request.method == "OPTIONS"):
                 response = Response()
             else:
