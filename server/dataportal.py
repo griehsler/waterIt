@@ -31,14 +31,15 @@ class WebService(object):
                 filename=configuration["database"], create_db=True)
         db.generate_mapping(create_tables=False)
 
+    def obj_dict(self, obj):
+        return obj.__dict__
+
     def load_data(self, days):
         elements = list()
         with db_session:
             for m in select(m for m in HumidityMeasure if m.timestamp + timedelta(days=days) >= datetime.now()):
-                elements.append(
-                    '{"value":' + str(m.value) + ',"timestamp":"' + str(m.timestamp) + '"}')
-        result = '[' + ','.join(elements) + ']'
-        return result
+                elements.append({"value":m.value,"timestamp":str(m.timestamp)})
+        return json.dumps(elements)
 
     def get_data_response(self, days):
         serialized = self.load_data(days)
