@@ -8,6 +8,9 @@ from pony.orm.core import *
 from datetime import datetime, timedelta
 import sys
 
+if (len(sys.argv) != 2):
+    sys.exit("please specify a config file")
+
 with open(sys.argv[1]) as config_file:
     configuration = json.load(config_file)
 
@@ -31,14 +34,14 @@ class WebService(object):
                 filename=configuration["database"], create_db=True)
         db.generate_mapping(create_tables=False)
 
-    def obj_dict(self, obj):
-        return obj.__dict__
-
     def load_data(self, days):
         elements = list()
         with db_session:
             for m in select(m for m in HumidityMeasure if m.timestamp + timedelta(days=days) >= datetime.now()):
-                elements.append({"value":m.value,"timestamp":str(m.timestamp)})
+                elements.append({
+                    "value": m.value,
+                    "timestamp": str(m.timestamp)
+                })
         return json.dumps(elements)
 
     def get_data_response(self, days):
@@ -55,8 +58,10 @@ class WebService(object):
             else:
                 raise NotFound()
             response.headers.add("Access-Control-Allow-Origin", "*")
-            response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH")
-            response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
+            response.headers.add(
+                "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH")
+            response.headers.add(
+                "Access-Control-Allow-Headers", "Content-Type, Authorization")
         else:
             raise NotFound()
         return response(environ, start_response)
@@ -66,6 +71,7 @@ class WebService(object):
             return self.wsgi_app(environ, start_response)
         except NotFound:
             return not_found(request)
+
 
 if __name__ == '__main__':
     from werkzeug.serving import run_simple
