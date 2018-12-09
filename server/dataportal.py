@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import json
 from pony.orm.core import db_session, select
 from datetime import timedelta
@@ -12,7 +13,7 @@ db.bind(provider="sqlite", filename=configuration["database"], create_db=True)
 db.generate_mapping(create_tables=False)
 
 app = Flask(__name__)
-
+CORS(app)
 
 def loadData(days):
     elements = list()
@@ -25,10 +26,8 @@ def loadData(days):
     return elements
 
 
-@app.route('/getdata', methods=['GET'])
+@app.route('/api/getdata', methods=['GET'])
 def getData():
     days = request.args.get('days', '2')
     data = loadData(int(days))
     return jsonify(data)
-
-print(app.config)
