@@ -4,7 +4,9 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python {location}/waterIt/server/dataportal.py {location}/waterIt/server/config.json
+RootDirectory={location}/waterIt/server
+Environment=FLASK_APP=dataportal.py
+ExecStart=/usr/bin/python -m flask run
 Restart=on-abort
 
 [Install]

@@ -1,79 +1,34 @@
-import os
-from werkzeug.wsgi import SharedDataMiddleware
-from werkzeug.wrappers import Request, Response
-from werkzeug.exceptions import HTTPException, NotFound
-from werkzeug.debug import DebuggedApplication
+from flask import Flask, jsonify, request
 import json
-from pony.orm.core import *
-from datetime import datetime, timedelta
+from pony.orm.core import db_session, select
+from datetime import timedelta
 import sys
+from model import *
 
-if (len(sys.argv) != 2):
-    sys.exit("please specify a config file")
-
-with open(sys.argv[1]) as config_file:
+with open('config.json') as config_file:
     configuration = json.load(config_file)
 
-db = Database()
+db.bind(provider="sqlite", filename=configuration["database"], create_db=True)
+db.generate_mapping(create_tables=False)
+
+app = Flask(__name__)
 
 
-class HumidityMeasure(db.Entity):
-    timestamp = Required(datetime)
-    value = Required(int)
+def loadData(days):
+    elements = list()
+    with db_session:
+        for m in select(m for m in HumidityMeasure if m.timestamp + timedelta(days=days) >= datetime.now()):
+            elements.append({
+                "value": m.value,
+                "timestamp": str(m.timestamp)
+            })
+    return elements
 
 
-class Event(db.Entity):
-    timestamp = Required(datetime)
-    kind = Required(str)
+@app.route('/getdata', methods=['GET'])
+def getData():
+    days = request.args.get('days', '2')
+    data = loadData(int(days))
+    return jsonify(data)
 
-
-class WebService(object):
-
-    def __init__(self):
-        db.bind(provider="sqlite",
-                filename=configuration["database"], create_db=True)
-        db.generate_mapping(create_tables=False)
-
-    def load_data(self, days):
-        elements = list()
-        with db_session:
-            for m in select(m for m in HumidityMeasure if m.timestamp + timedelta(days=days) >= datetime.now()):
-                elements.append({
-                    "value": m.value,
-                    "timestamp": str(m.timestamp)
-                })
-        return json.dumps(elements)
-
-    def get_data_response(self, days):
-        serialized = self.load_data(days)
-        return Response(serialized, mimetype='application/json')
-
-    def wsgi_app(self, environ, start_response):
-        request = Request(environ)
-        if (request.path == "/getdata"):
-            if (request.method == "GET"):
-                response = self.get_data_response(2)
-            elif (request.method == "OPTIONS"):
-                response = Response()
-            else:
-                raise NotFound()
-            response.headers.add("Access-Control-Allow-Origin", "*")
-            response.headers.add(
-                "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH")
-            response.headers.add(
-                "Access-Control-Allow-Headers", "Content-Type, Authorization")
-        else:
-            raise NotFound()
-        return response(environ, start_response)
-
-    def __call__(self, environ, start_response):
-        try:
-            return self.wsgi_app(environ, start_response)
-        except NotFound:
-            return not_found(request)
-
-
-if __name__ == '__main__':
-    from werkzeug.serving import run_simple
-    app = WebService()
-    run_simple('0.0.0.0', 5000, app, use_debugger=False, use_reloader=False)
+print(app.config)

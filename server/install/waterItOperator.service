@@ -4,7 +4,8 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python {location}/waterIt/server/operator.py {location}/waterIt/server/config.json
+RootDirectory={location}/waterIt/server
+ExecStart=/usr/bin/python commandoperator.py
 Restart=on-abort
 
 [Install]

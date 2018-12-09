@@ -2,10 +2,12 @@ import paho.mqtt.client as mqtt
 from datetime import datetime
 import pytz
 import json
-from pony.orm import *
+from pony.orm import db_session
 import sys
+from model import *
 
-with open(sys.argv[1]) as config_file:
+with open('config.json') as config_file:
+    1
     configuration = json.load(config_file)
 
 incomingTopic = configuration["incomingTopic"]
@@ -14,20 +16,6 @@ outgoingTopic = configuration["outgoingTopic"]
 humidityThreshold = configuration["humidityThreshold"]
 pumpDuration = configuration["pumpSeconds"] * 1000
 sleepDuration = configuration["sleepMinutes"] * 60000
-
-db = Database()
-
-
-class HumidityMeasure(db.Entity):
-    timestamp = Required(datetime)
-    value = Required(int)
-
-
-class Event(db.Entity):
-    timestamp = Required(datetime)
-    kind = Required(str)
-
-
 db.bind(provider='sqlite', filename=configuration["database"], create_db=True)
 db.generate_mapping(create_tables=True)
 
@@ -70,7 +58,6 @@ def on_message(client, userdata, msg):
 
 
 def sendMessage(message, retain):
-    #alert("sending: " + message)
     client.publish(outgoingTopic, message, 1, retain)
 
 
