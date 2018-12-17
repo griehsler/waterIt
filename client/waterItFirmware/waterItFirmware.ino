@@ -9,7 +9,9 @@
 
 #include "private.h"
 
-String FIRMWARE_VERSION = "1.0";
+#define FALLBACK_SLEEP_DURATION 900000 // 15mins
+
+String FIRMWARE_VERSION = "1.0.1";
 
 int LEVEL_SENSOR_PIN = D6;
 int WATER_FEED_PIN = D7;
@@ -39,6 +41,7 @@ void setup()
 void loop()
 {
     _bus.loop();
+    deepSleep(FALLBACK_SLEEP_DURATION);
 }
 
 IncomingCommand *createIncomingCommand(String name)
