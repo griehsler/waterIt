@@ -2,4 +2,4 @@ Flask==1.0.2
 paho-mqtt==1.4.0
 pony==0.7.6
 pytz==2018.7
-Flask-Cors==3.0.7
+Flask-Cors==3.0.9
